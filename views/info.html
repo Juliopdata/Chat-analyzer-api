@@ -1,0 +1,67 @@
+<html style="font-family: sans-serif;">
+
+<body style="background-color: rgb(250, 250, 250);">
+    <div style="display: flex;justify-content: center;margin-top: 10vh;">
+        <table border="3" , cellspacing="5" width='700vw' style='background-color: Beige'>
+            <tr>
+                <th>
+                    <h1>{{title}}</h1>
+                </th>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO POST A MESSAGE CLICK <a href="/chat/addmessage">HERE</a></h3>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO CREATE A USER CLICK <a href="/user/create">HERE</a></h3>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO CREATE A CHAT CLICK <a href="/chat/create">HERE</a></h3>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO ADD A USER TO A CHAT CLICK <a href="/chat/adduser">HERE</a></h3>
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO GET A CHAT</h3>
+                    <p>URL =/chat/<strong>chat_id</strong>/list</p>
+                    <p>chat_id => <strong>#integer</strong> </p>
+                </td>
+            </tr>
+
+
+
+
+
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO GET A CHAT SENTIMENT</h3>
+                    <p>URL =/chat/<strong>chat_id</strong>/sentiment</p>
+                    <p>chat_id => <strong>#integer</strong> </p>
+                    <p>Return the analysis of the chat.</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">
+                    <h3>TO GET USER RECOMENDATIONS</a></h3>
+                    <p>URL = /user/<strong>user_id</strong>/recommend</p>
+                    <p>user_id => <strong>#integer</strong> </p>
+                    <p>Returns the ids recommendations.</p>
+                </td>
+            </tr>
+
+
+        </table>
+    </div>
+</body>

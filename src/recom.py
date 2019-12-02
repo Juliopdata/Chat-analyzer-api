@@ -1,9 +1,8 @@
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity as distance
-
 import pandas as pd
 import numpy as np
-# import seaborn as sns
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity as distance
 
 def similarityDF(TokensDict):
     count_vectorizer = CountVectorizer()
@@ -12,6 +11,5 @@ def similarityDF(TokensDict):
     df = pd.DataFrame(Tokens_term_matrix,columns=count_vectorizer.get_feature_names(),index=TokensDict.keys())
     similarity_matrix = distance(df, df)
     sim_df = pd.DataFrame(similarity_matrix, columns=TokensDict.keys(), index=TokensDict.keys())
-    # sns.heatmap(sim_df,annot=True)
     np.fill_diagonal(sim_df.values, 0)
     return sim_df

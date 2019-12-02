@@ -1,7 +1,8 @@
-from pymongo import MongoClient
 import getpass
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
+
 load_dotenv()
 #Get Password
 connection = os.getenv("pass")
