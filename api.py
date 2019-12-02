@@ -1,29 +1,34 @@
-from bottle import route, run, get, post, request
+
 import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity as distance
-from src.recommender import *
+import re
 import numpy as np
-from nltk.tokenize import RegexpTokenizer
-from nltk.corpus import stopwords
-import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('vader_lexicon')
 import datetime
 import os
 import bson
+import nltk
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity as distance
+from bottle import route, run, get, post, request
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
 from bson.json_util import dumps
-import re
-from src.sentiment import *
-from functions.mongo import connectCollection
 from dotenv import load_dotenv
+
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('vader_lexicon')
+
+from src.sent import *
+from src.recom import *
+from src.mongo import connectCollection
+
+
 load_dotenv()
 
 db, coll = connectCollection('api-project', 'chats')
 db, users = connectCollection('api-project', 'users')
 db, chatsCR = connectCollection('api-project', 'chatsCR')
-#db, msgs = connectCollection('api-project', 'messages')
 
 def main():
 
