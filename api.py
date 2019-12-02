@@ -1,4 +1,14 @@
 from bottle import route, run, get, post, request
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity as distance
+from src.recommender import *
+import numpy as np
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
+import nltk
+#nltk.download('stopwords')
+#nltk.download('punkt')
 import datetime
 import bson
 from bson.json_util import dumps
@@ -167,5 +177,31 @@ def getSentiment(chat_id):
     messagesSentiment = sentimentAnalyzer(msgs)
     return messagesSentiment
 
+@get('/user/<user_id>/recommend')
+def recommendUsers(user_id):
+    data = list(coll.find({}))
+    usersdata = list(users.aggregate([{'$project': {'idUser': 1}}]))
+    listausers=[]
+    for h in usersdata:
+        listausers.append(int(h['idUser']))
+    print (int(user_id))
+    if int(user_id) not in listausers:
+            return 'ERROR! Unknown User. You must <a href="/user/create">CREATE</a> the User first'
+    tokenizer = RegexpTokenizer(r'\w+')
+    stop_words = set(stopwords.words('english'))       
+    TokensDict = {}
+    for userId in listausers:
+        usersData = list(coll.find({'idUser': userId}))
+        usersTokens = [tokenizer.tokenize(e['text']) for e in usersData]
+        usersTokens_clean = [word for message in usersTokens for word in message if word not in stop_words]
+        TokensDict[f'{userId}'] = ' '.join(usersTokens_clean)
+    count_vectorizer = CountVectorizer()
+    sparse_matrix = count_vectorizer.fit_transform(TokensDict.values())
+    Tokens_term_matrix = sparse_matrix.todense()
+    df = pd.DataFrame(Tokens_term_matrix,columns=count_vectorizer.get_feature_names(),index=TokensDict.keys())
+    similarity_matrix = distance(df, df)
+    sim_df = pd.DataFrame(similarity_matrix, columns=TokensDict.keys(), index=TokensDict.keys())
+    np.fill_diagonal(sim_df.values, 0)
+    return {'recommended_users': [int(e) for e in list(sim_df[str(user_id)].sort_values(ascending=False)[0:3].index)]}
 
 run(host='localhost', port=8080)
