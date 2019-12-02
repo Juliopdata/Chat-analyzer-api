@@ -3,7 +3,6 @@ import datetime
 import bson
 from bson.json_util import dumps
 import re
-#import mongof as mf
 from src.sentiment import *
 from functions.mongo import connectCollection
 from dotenv import load_dotenv
@@ -17,7 +16,7 @@ db, msgs = connectCollection('api-project', 'messages')
 
 @get("/")
 def test():
-    return dumps(coll.find({}))
+    return ''' '''
 
 @get("/user/create")
 def userForm():
@@ -51,26 +50,47 @@ def userForm():
 
 @post('/chat/create')
 def createChat():
-    userslist = list(request.forms.get('users'))
-    userslist.remove(',')
-    if len(userslist) > 3:
-        return {'Error! 2 USERS MAX'}
+    userslist = str(request.forms.get('users'))
+    userslist = list(userslist.split(","))
+    print(userslist)
     chatsids = list(chatsCR.aggregate([{'$project':{'idChat':1}}]))
     usersdata = list(users.aggregate([{'$project': {'idUser': 1}}]))
     chatID = max([e['idChat'] for e in chatsids])+1
     listausers = []
     for h in usersdata:
         listausers.append(int(h['idUser']))
-    print(listausers)
     for e in userslist:
-        print(e)
         if int(e) not in listausers:
-            return {'ERROR! Unknown Users. You must create the User first'}
+            return 'ERROR! Unknown Users. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first'
         else:
             newchat = {'idChat': int(chatID),'users': userslist}
-            message_id = coll.insert_one(newchat).inserted_id
+            message_id = chatsCR.insert_one(newchat).inserted_id
             return dumps(newchat)
-
+            
+@post('/chat/<chat_id>/adduser')
+def addUserToChat(chat_id):
+    db, coll = connectCollection('chats','chats')
+    data = list(coll.find({'idChat': int(chat_id)}))
+    # Checking if chat exists:
+    if len(data) == 0:
+        error = "Sorry, this chat doesn't exist. You must create it first."
+        return {'Exception':error}
+    user = int(request.forms.get('userId'))
+    db2, coll2 = connectCollection('chats','users')
+    usersData = list(coll2.aggregate([{'$project':{'idUser':1}}]))
+    # Checking if user exists:
+    if user not in [e['idUser'] for e in usersData]:
+        error = 'Sorry, the user you are trying to include does not exist in the database. You must create it first.'
+        return {'Exception':error}
+    users = [int(e) for e in re.sub('\[|\]','',data[0]['users']).split(', ')]        
+    # Checking if user is already part of the chat:
+    if user in users:
+        error = 'Sorry, this user is already part of the chat'
+        return {'Exception':error}
+    users.append(user)
+    # Adding the new user to the chat:
+    coll.update_one({'idChat': int(chat_id)}, {'$set':{'users':str(users)}})
+    return {'UserId': user, 'ChatId': int(chat_id)}
 
 
 
