@@ -21,12 +21,12 @@ load_dotenv()
 db, coll = connectCollection('api-project', 'chats')
 db, users = connectCollection('api-project', 'users')
 db, chatsCR = connectCollection('api-project', 'chatsCR')
-db, msgs = connectCollection('api-project', 'messages')
+#db, msgs = connectCollection('api-project', 'messages')
 
 
 @get("/")
 def test():
-    return ''' '''
+    return ''' WELCOME TO MY API'''
 
 
 @get("/user/create")
@@ -65,18 +65,22 @@ def userForm():
 def createChat():
     userslist = str(request.forms.get('users'))
     userslist = list(userslist.split(","))
-    print(userslist)
+    userslistF = []
+    for i in userslist:
+        userslistF.append(int(i))
+    print(userslistF)
     chatsids = list(chatsCR.aggregate([{'$project': {'idChat': 1}}]))
     usersdata = list(users.aggregate([{'$project': {'idUser': 1}}]))
     chatID = max([e['idChat'] for e in chatsids])+1
     listausers = []
     for h in usersdata:
         listausers.append(int(h['idUser']))
-    for e in userslist:
+    for e in userslistF:
         if int(e) not in listausers:
             return 'ERROR! Unknown Users. You must <a href="/user/create">CREATE</a> the User first'
         else:
-            newchat = {'idChat': int(chatID), 'users': userslist}
+            
+            newchat = {'idChat': int(chatID), 'users': str(userslistF)}
             message_id = chatsCR.insert_one(newchat).inserted_id
             return dumps(newchat)
 
@@ -133,10 +137,8 @@ def addMessageToChat():
     if chatID not in chats:
         return 'ERROR! Unknown chat. You must <a href="/chat/create">CREATE</a> the Chat first.'
     chato = list(chatsCR.find({'idChat': int(chatID)}))
-    print(chato)
-    chatusers = [int(e) for e in re.sub(
-        '\[|\]', '', chato[0]['users']).split(', ')]
-    if user not in chatusers:
+    usersData = list(users.aggregate([{'$project': {'idUser': 1}}]))
+    if user not in [e['idUser'] for e in usersData]:
         return 'ERROR! Unknown User. You must <a href="/user/create">CREATE</a> the User first.'
     selectedUser = list(users.find({'idUser': user}))
     if len(data) == 0:
@@ -174,6 +176,7 @@ def getMessages(chat_id):
 @get('/chat/<chat_id>/sentiment')
 def getSentiment(chat_id):
     msgs = getMessages(chat_id)
+    print(msgs)
     messagesSentiment = sentimentAnalyzer(msgs)
     return messagesSentiment
 

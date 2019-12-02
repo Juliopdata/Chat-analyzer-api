@@ -21,14 +21,6 @@ dfNew.to_json('./output/users.json', orient='records')
 coll2 = db['users']
 coll2.insert_many(dfNew.to_dict('records'))
 
-dfchats = df['idChat'].copy()
-
-dfchats = df['idChat'].mask(df['idChat'].duplicated()).dropna()
-
-dfchats = dfchats.reset_index()
-chats = ['chat00', 'chat01', 'chat02', 'chat03', 'chat04']
-dfchats['ChatsNum'] = chats
-
 dfchats = dfchats.drop(['index'], axis=1)
 
 coll3 = db['chatsid']
