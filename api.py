@@ -18,6 +18,7 @@ db, msgs = connectCollection('api-project', 'messages')
 def test():
     return ''' '''
 
+
 @get("/user/create")
 def userForm():
     return '''
@@ -25,6 +26,7 @@ def userForm():
             Enter a new Username: <input name="username" type="text" />
             <input type="submit" />
         </form>'''
+
 
 @post("/user/create")
 def createUser():
@@ -48,12 +50,13 @@ def userForm():
         </form>
     '''
 
+
 @post('/chat/create')
 def createChat():
     userslist = str(request.forms.get('users'))
     userslist = list(userslist.split(","))
     print(userslist)
-    chatsids = list(chatsCR.aggregate([{'$project':{'idChat':1}}]))
+    chatsids = list(chatsCR.aggregate([{'$project': {'idChat': 1}}]))
     usersdata = list(users.aggregate([{'$project': {'idUser': 1}}]))
     chatID = max([e['idChat'] for e in chatsids])+1
     listausers = []
@@ -63,36 +66,38 @@ def createChat():
         if int(e) not in listausers:
             return 'ERROR! Unknown Users. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first'
         else:
-            newchat = {'idChat': int(chatID),'users': userslist}
+            newchat = {'idChat': int(chatID), 'users': userslist}
             message_id = chatsCR.insert_one(newchat).inserted_id
             return dumps(newchat)
-            
-@post('/chat/<chat_id>/adduser')
-def addUserToChat(chat_id):
-    db, coll = connectCollection('chats','chats')
-    data = list(coll.find({'idChat': int(chat_id)}))
-    # Checking if chat exists:
+
+
+@get('/chat/adduser')
+def messageForm():
+    return '''<form method="post" action="/chat/adduser">
+                Insert a UserID: <input name="user" type="text" />
+                Insert a ChatID: <input name="chatID" type="text" />
+                <input type="submit" />
+            </form>'''
+
+
+@post('/chat/adduser')
+def addUserToChat():
+    chatid = int(request.forms.get('chatID'))
+    user = int(request.forms.get('user'))
+    data = list(chatsCR.find({'idChat': int(chatid)}))
     if len(data) == 0:
-        error = "Sorry, this chat doesn't exist. You must create it first."
-        return {'Exception':error}
-    user = int(request.forms.get('userId'))
-    db2, coll2 = connectCollection('chats','users')
-    usersData = list(coll2.aggregate([{'$project':{'idUser':1}}]))
-    # Checking if user exists:
+        return 'ERROR! Unknown chat. You must <a href="http://localhost:8080/chat/create">CREATE</a> the Chat first.'
+    usersData = list(users.aggregate([{'$project': {'idUser': 1}}]))
     if user not in [e['idUser'] for e in usersData]:
-        error = 'Sorry, the user you are trying to include does not exist in the database. You must create it first.'
-        return {'Exception':error}
-    users = [int(e) for e in re.sub('\[|\]','',data[0]['users']).split(', ')]        
-    # Checking if user is already part of the chat:
-    if user in users:
-        error = 'Sorry, this user is already part of the chat'
-        return {'Exception':error}
-    users.append(user)
-    # Adding the new user to the chat:
-    coll.update_one({'idChat': int(chat_id)}, {'$set':{'users':str(users)}})
-    return {'UserId': user, 'ChatId': int(chat_id)}
-
-
+        return 'ERROR! Unknown User. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first.'
+    listusers = [int(e)
+                 for e in re.sub('\[|\]', '', data[0]['users']).split(', ')]
+    if user in listusers:
+        return 'ERROR! User already in User List'
+    listusers.append(user)
+    coll.update_one({'idChat': int(chatid)}, {
+                    '$set': {'users': str(listusers)}})
+    return {'UserId': user, 'ChatId': int(chatid)}
 
 
 @get('/chat/addmessage')
@@ -113,20 +118,16 @@ def addMessageToChat():
     user = int(request.forms.get('user'))
     message = str(request.forms.get('message'))
     data = list(coll.find({'idChat': int(chatID)}))
-    # Checking the chat
     chats = list(chatsCR.aggregate([{'$project': {'idChat': 1}}]))
     chats = [int(x.get('idChat')) for x in chats]
     if chatID not in chats:
-        error = "Sorry, this chat doesn't exist. You must create it first."
-        return {'Exception': error}
-    # Check the user
+        return 'ERROR! Unknown chat. You must <a href="http://localhost:8080/chat/create">CREATE</a> the Chat first.'
     chato = list(chatsCR.find({'idChat': int(chatID)}))
     print(chato)
-    chatusers = [int(e) for e in re.sub('\[|\]','',chato[0]['users']).split(', ')]
+    chatusers = [int(e) for e in re.sub(
+        '\[|\]', '', chato[0]['users']).split(', ')]
     if user not in chatusers:
-        error = 'Sorry, this user is not part of the chat. You must add him/her first.'
-        return {'Exception': error}
-    # Adding the new message:
+        return 'ERROR! Unknown User. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first.'
     selectedUser = list(users.find({'idUser': user}))
     if len(data) == 0:
         newMessageId = 0
@@ -142,12 +143,13 @@ def addMessageToChat():
     message_id = coll.insert_one(newMessage).inserted_id
     return dumps(newMessage)
 
+
 @get('/chat/<chat_id>/list')
 def getMessages(chat_id):
     data = list(coll.find({'idChat': int(chat_id)}))
     messages = {}
 
-    for index,dictionary in enumerate(data):
+    for index, dictionary in enumerate(data):
         index += 1
         messages[f'message_{index}'] = {'user': dictionary['userName'],
                                         'date': str(dictionary['datetime'])[0:10],
@@ -155,18 +157,16 @@ def getMessages(chat_id):
                                         'text': dictionary['text']}
     if len(messages) == 0:
         error = 'Sorry, this chat does not exist in the database'
-        return {'Exception':error}
+        return {'Exception': error}
     else:
         return messages
 
+
 @get('/chat/<chat_id>/sentiment')
 def getSentiment(chat_id):
-    messages = getMessages(chat_id)
-    if 'Exception' in messages:
-        return messages
-    else:
-        messagesSentiment = sentimentAnalyzer(messages)
-        return messagesSentiment
+    msgs = getMessages(chat_id)
+    messagesSentiment = sentimentAnalyzer(msgs)
+    return messagesSentiment
 
 
 run(host='localhost', port=8080)
