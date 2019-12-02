@@ -64,7 +64,7 @@ def createChat():
         listausers.append(int(h['idUser']))
     for e in userslist:
         if int(e) not in listausers:
-            return 'ERROR! Unknown Users. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first'
+            return 'ERROR! Unknown Users. You must <a href="/user/create">CREATE</a> the User first'
         else:
             newchat = {'idChat': int(chatID), 'users': userslist}
             message_id = chatsCR.insert_one(newchat).inserted_id
@@ -86,10 +86,10 @@ def addUserToChat():
     user = int(request.forms.get('user'))
     data = list(chatsCR.find({'idChat': int(chatid)}))
     if len(data) == 0:
-        return 'ERROR! Unknown chat. You must <a href="http://localhost:8080/chat/create">CREATE</a> the Chat first.'
+        return 'ERROR! Unknown chat. You must <a href="/chat/create">CREATE</a> the Chat first.'
     usersData = list(users.aggregate([{'$project': {'idUser': 1}}]))
     if user not in [e['idUser'] for e in usersData]:
-        return 'ERROR! Unknown User. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first.'
+        return 'ERROR! Unknown User. You must <a href="/user/create">CREATE</a> the User first.'
     listusers = [int(e)
                  for e in re.sub('\[|\]', '', data[0]['users']).split(', ')]
     if user in listusers:
@@ -121,13 +121,13 @@ def addMessageToChat():
     chats = list(chatsCR.aggregate([{'$project': {'idChat': 1}}]))
     chats = [int(x.get('idChat')) for x in chats]
     if chatID not in chats:
-        return 'ERROR! Unknown chat. You must <a href="http://localhost:8080/chat/create">CREATE</a> the Chat first.'
+        return 'ERROR! Unknown chat. You must <a href="/chat/create">CREATE</a> the Chat first.'
     chato = list(chatsCR.find({'idChat': int(chatID)}))
     print(chato)
     chatusers = [int(e) for e in re.sub(
         '\[|\]', '', chato[0]['users']).split(', ')]
     if user not in chatusers:
-        return 'ERROR! Unknown User. You must <a href="http://localhost:8080/user/create">CREATE</a> the User first.'
+        return 'ERROR! Unknown User. You must <a href="/user/create">CREATE</a> the User first.'
     selectedUser = list(users.find({'idUser': user}))
     if len(data) == 0:
         newMessageId = 0
@@ -156,8 +156,7 @@ def getMessages(chat_id):
                                         'time': str(dictionary['datetime'])[11:19],
                                         'text': dictionary['text']}
     if len(messages) == 0:
-        error = 'Sorry, this chat does not exist in the database'
-        return {'Exception': error}
+        return 
     else:
         return messages
 
