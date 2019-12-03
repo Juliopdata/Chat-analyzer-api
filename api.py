@@ -1,6 +1,5 @@
 
 from src.mongo import connectCollection
-from src.recom import *
 from src.sent import *
 import pandas as pd
 import re
