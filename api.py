@@ -140,8 +140,7 @@ def main():
         for index, dictionary in enumerate(data):
             index += 1
             messages[f'message_{index}'] = {'user': dictionary['userName'],
-                                            'date': str(dictionary['datetime'])[0:10],
-                                            'time': str(dictionary['datetime'])[11:19],
+                                            'date': str(dictionary['datetime'])[0:19],
                                             'text': dictionary['text']}
         if len(messages) == 0:
             return
@@ -183,7 +182,7 @@ def main():
         sim_df = pd.DataFrame(
             similarity_matrix, columns=TokensDict.keys(), index=TokensDict.keys())
         np.fill_diagonal(sim_df.values, 0)
-        return {'recommended_users': [int(e) for e in list(sim_df[str(user_id)].sort_values(ascending=False)[0:3].index)]}
+        return {'The_usersID_recommended_are': [int(e) for e in list(sim_df[str(user_id)].sort_values(ascending=False)[0:2].index)]}
 
     port = int(os.getenv('PORT', 8080))
     host = os.getenv('IP', '0.0.0.0')
