@@ -34,7 +34,7 @@ The project folder is structured in the following way:
 
 ## Link to the Html Beta Api in Heroku
 
-## * https://ironapichat.herokuapp.com/ 
+## https://ironapichat.herokuapp.com/ 
 
 ## Resources
 
