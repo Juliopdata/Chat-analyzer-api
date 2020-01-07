@@ -1,4 +1,4 @@
-# <p align="center"> Api Chat Sentiment Analyzer </p>
+# <p align="center"> Api Sentiment Chat Analyzer </p>
 
 
   <p align="center"> <img  src="https://github.com/Juliopdata/chat-analyzer-api/blob/master/images/chatcaptura.png"></p>
@@ -32,24 +32,22 @@ The project folder is structured in the following way:
 * __VIEWS__: html templates.
 
 
-
-
-
 ## Link to the Html Beta Api in Heroku
 
 ## * https://ironapichat.herokuapp.com/ 
 
-​
-### Links - API dev in python
+## Resources
+
+### API dev in python
 - [https://bottlepy.org/docs/dev/]
 - [https://www.getpostman.com/]
 ​
-### Links - NLP & Text Sentiment Analysis
+### NLP & Text Sentiment Analysis
 - [https://www.nltk.org/]
 - [https://towardsdatascience.com/basic-binary-sentiment-analysis-using-nltk-c94ba17ae386]
 - [https://www.digitalocean.com/community/tutorials/how-to-perform-sentiment-analysis-in-python-3-using-the-natural-language-toolkit-nltk]
 ​
-### Links - Heroku & Docker & Cloud Databases
+### Heroku & Docker & Cloud Databases
 - [https://docs.docker.com/engine/reference/builder/]
 - [https://runnable.com/docker/python/dockerize-your-python-application]
 - [https://devcenter.heroku.com/articles/container-registry-and-runtime]
