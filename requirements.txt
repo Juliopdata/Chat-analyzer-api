@@ -1,6 +1,6 @@
 # Requirements:
 
-bottle==0.12.17
+bottle==0.12.20
 json5==0.8.4
 nltk==3.4.5
 numpy==1.16.4
