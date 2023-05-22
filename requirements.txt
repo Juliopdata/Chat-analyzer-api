@@ -8,6 +8,6 @@ pandas==0.25.2
 pathlib2==2.3.4
 pymongo==3.9.0
 python-dotenv==0.10.3
-requests==2.22.0
+requests==2.31.0
 sklearn==0.0
 dnspython==1.16.0
